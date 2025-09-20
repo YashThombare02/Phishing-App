@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .analysis-form {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 70%;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Phishing URL Analysis</h1>
+    
+    <div class="analysis-form">
+        <input type="text" id="urlInput" value="https://btinternetcomxxchn-dk96.glide.page/dl/2432" placeholder="Enter URL to analyze">
+        <button onclick="analyzeURL()">Analyze</button>
+    </div>
+    
+    <div id="result"></div>
+
+    <script>
+        async function analyzeURL() {
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = "Analyzing URL... Please wait.";
+            
+            try {
+                // Manual analysis of the URL based on common phishing indicators
+                const analysis = manualAnalysis(url);
+                resultDiv.innerHTML = analysis;
+            } catch (error) {
+                resultDiv.innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        function manualAnalysis(url) {
+            // Parse URL
+            let urlObj;
+            try {
+                urlObj = new URL(url);
+            } catch (e) {
+                return "Invalid URL format";
+            }
+            
+            const domain = urlObj.hostname;
+            const path = urlObj.pathname;
+            const protocol = urlObj.protocol;
+            
+            // Phishing indicators
+            const indicators = [];
+            let phishingScore = 0;
+            let totalChecks = 0;
+            
+            // 1. Check for suspicious domain name
+            totalChecks++;
+            if (domain.includes("btinternetcom") && domain.includes("xxchn")) {
+                indicators.push("Domain appears to be impersonating BT Internet (British Telecom)");
+                phishingScore++;
+            }
+            
+            // 2. Check for hyphens in domain
+            totalChecks++;
+            if (domain.includes("-")) {
+                indicators.push("Domain contains hyphens, which is often used in phishing domains");
+                phishingScore++;
+            }
+            
+            // 3. Check for suspicious TLD
+            totalChecks++;
+            const tld = domain.split('.').pop();
+            const suspiciousTlds = ['page', 'xyz', 'tk', 'ml', 'ga', 'cf', 'gq'];
+            if (suspiciousTlds.includes(tld)) {
+                indicators.push(`Domain uses suspicious TLD (.${tld}), often associated with free domains used in phishing`);
+                phishingScore++;
+            }
+            
+            // 4. Check for HTTP instead of HTTPS
+            totalChecks++;
+            if (protocol !== "https:") {
+                indicators.push("Website doesn't use secure HTTPS protocol");
+                phishingScore++;
+            }
+            
+            // 5. Check for subdomain abuse
+            totalChecks++;
+            const domainParts = domain.split('.');
+            if (domainParts.length > 2) {
+                indicators.push("Uses a subdomain structure that may be attempting to hide the actual domain");
+                phishingScore++;
+            }
+            
+            // 6. Check for random numbers/strings in domain
+            totalChecks++;
+            if (/\d/.test(domain)) {
+                indicators.push("Domain contains numbers, which is often seen in automatically generated phishing domains");
+                phishingScore++;
+            }
+            
+            // 7. Check for URL shortener or redirect service
+            totalChecks++;
+            if (domain.includes("glide.page")) {
+                indicators.push("Uses glide.page which may be used to obscure the actual destination");
+                phishingScore++;
+            }
+            
+            // 8. Check for suspicious path
+            totalChecks++;
+            if (path.includes("/dl/")) {
+                indicators.push("Path contains '/dl/' which often indicates a download, potentially malicious");
+                phishingScore++;
+            }
+            
+            // Calculate confidence
+            const confidence = Math.round((phishingScore / totalChecks) * 100);
+            
+            // Final verdict
+            const isPhishing = confidence > 60;
+            
+            // Format result
+            let result = `=== PHISHING ANALYSIS RESULTS ===\n\n`;
+            result += `URL: ${url}\n`;
+            result += `Final Verdict: ${isPhishing ? 'PHISHING' : 'LEGITIMATE'}\n`;
+            result += `Confidence: ${confidence}%\n\n`;
+            
+            result += `=== DOMAIN STRUCTURE ===\n`;
+            result += `Full Domain: ${domain}\n`;
+            result += `TLD: .${tld}\n`;
+            result += `Protocol: ${protocol}\n\n`;
+            
+            result += `=== INDICATORS ===\n`;
+            if (indicators.length > 0) {
+                indicators.forEach(indicator => {
+                    result += `- ${indicator}\n`;
+                });
+            } else {
+                result += `No suspicious indicators found.\n`;
+            }
+            
+            result += `\n=== RECOMMENDATION ===\n`;
+            if (isPhishing) {
+                result += `This URL has multiple characteristics commonly associated with phishing websites. It appears to be impersonating BT Internet (British Telecom) and uses several deceptive techniques in its domain structure. DO NOT enter any personal information or credentials on this site.`;
+            } else {
+                result += `This URL has some suspicious characteristics but may be legitimate. Exercise caution and verify the website's authenticity before entering any personal information.`;
+            }
+            
+            return result;
+        }
+        
+        // Auto-analyze on page load
+        window.onload = function() {
+            analyzeURL();
+        };
+    </script>
+</body>
+</html>

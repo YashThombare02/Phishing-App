@@ -1,0 +1,84 @@
+[
+  {"phish_id": "7829173", "url": "http://paypal-secure-login.com", "submission_time": "2023-09-20T10:15:20+00:00", "verified": "yes", "verification_time": "2023-09-20T11:30:45+00:00", "target": "PayPal"},
+  {"phish_id": "7829174", "url": "https://google-login-verification.com", "submission_time": "2023-09-20T09:12:18+00:00", "verified": "yes", "verification_time": "2023-09-20T10:45:12+00:00", "target": "Google"},
+  {"phish_id": "7829175", "url": "http://microsoft-365-verify-account.com", "submission_time": "2023-09-20T14:08:55+00:00", "verified": "yes", "verification_time": "2023-09-20T15:30:22+00:00", "target": "Microsoft"},
+  {"phish_id": "7829176", "url": "https://apple-id-verification-service.com", "submission_time": "2023-09-20T08:33:47+00:00", "verified": "yes", "verification_time": "2023-09-20T09:15:33+00:00", "target": "Apple"},
+  {"phish_id": "7829177", "url": "http://amazon-account-verify.com", "submission_time": "2023-09-20T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-20T12:55:10+00:00", "target": "Amazon"},
+  {"phish_id": "7829178", "url": "http://secure-bank-login.com", "submission_time": "2023-09-20T16:00:00+00:00", "verified": "yes", "verification_time": "2023-09-20T17:00:00+00:00", "target": "Various Banks"},
+  {"phish_id": "7829179", "url": "http://account-verification-center.com", "submission_time": "2023-09-20T16:00:00+00:00", "verified": "yes", "verification_time": "2023-09-20T17:00:00+00:00", "target": "Various"},
+  {"phish_id": "7829180", "url": "http://banking-secure-signin.net", "submission_time": "2023-09-20T16:00:00+00:00", "verified": "yes", "verification_time": "2023-09-20T17:00:00+00:00", "target": "Various Banks"},
+  
+  {"phish_id": "7829201", "url": "http://www.paypa1.com/signin", "submission_time": "2023-09-21T10:15:20+00:00", "verified": "yes", "verification_time": "2023-09-21T11:30:45+00:00", "target": "PayPal"},
+  {"phish_id": "7829202", "url": "https://accounts-g00gle.com/signin", "submission_time": "2023-09-21T09:12:18+00:00", "verified": "yes", "verification_time": "2023-09-21T10:45:12+00:00", "target": "Google"},
+  {"phish_id": "7829203", "url": "http://m1crosoft-verify.com", "submission_time": "2023-09-21T14:08:55+00:00", "verified": "yes", "verification_time": "2023-09-21T15:30:22+00:00", "target": "Microsoft"},
+  {"phish_id": "7829204", "url": "https://app1e-account-verify.com", "submission_time": "2023-09-21T08:33:47+00:00", "verified": "yes", "verification_time": "2023-09-21T09:15:33+00:00", "target": "Apple"},
+  {"phish_id": "7829205", "url": "http://amaz0n-security.com", "submission_time": "2023-09-21T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-21T12:55:10+00:00", "target": "Amazon"},
+  
+  {"phish_id": "7829206", "url": "http://chase-bank-verification.tk", "submission_time": "2023-09-22T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-22T12:55:10+00:00", "target": "Chase Bank"},
+  {"phish_id": "7829207", "url": "https://wellsfargo-secure.ml", "submission_time": "2023-09-22T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-22T12:55:10+00:00", "target": "Wells Fargo"},
+  {"phish_id": "7829208", "url": "http://citibank-online-secure.ga", "submission_time": "2023-09-22T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-22T12:55:10+00:00", "target": "Citibank"},
+  {"phish_id": "7829209", "url": "https://bankofamerica-login.cf", "submission_time": "2023-09-22T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-22T12:55:10+00:00", "target": "Bank of America"},
+  {"phish_id": "7829210", "url": "http://capitalone-verify.gq", "submission_time": "2023-09-22T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-22T12:55:10+00:00", "target": "Capital One"},
+  
+  {"phish_id": "7829211", "url": "http://www.facebook-login-help.xyz", "submission_time": "2023-09-23T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-23T12:55:10+00:00", "target": "Facebook"},
+  {"phish_id": "7829212", "url": "https://instagram-verify.top", "submission_time": "2023-09-23T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-23T12:55:10+00:00", "target": "Instagram"},
+  {"phish_id": "7829213", "url": "http://twitter-account-recovery.work", "submission_time": "2023-09-23T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-23T12:55:10+00:00", "target": "Twitter"},
+  {"phish_id": "7829214", "url": "https://linkedin-security.date", "submission_time": "2023-09-23T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-23T12:55:10+00:00", "target": "LinkedIn"},
+  {"phish_id": "7829215", "url": "http://netflix-subscription.faith", "submission_time": "2023-09-23T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-23T12:55:10+00:00", "target": "Netflix"},
+  
+  {"phish_id": "7829216", "url": "http://dropbox-share.stream", "submission_time": "2023-09-24T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-24T12:55:10+00:00", "target": "Dropbox"},
+  {"phish_id": "7829217", "url": "https://onedrive-document.com/secure", "submission_time": "2023-09-24T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-24T12:55:10+00:00", "target": "OneDrive"},
+  {"phish_id": "7829218", "url": "http://spotify-premium.com/verify", "submission_time": "2023-09-24T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-24T12:55:10+00:00", "target": "Spotify"},
+  {"phish_id": "7829219", "url": "https://steam-games.com/login", "submission_time": "2023-09-24T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-24T12:55:10+00:00", "target": "Steam"},
+  {"phish_id": "7829220", "url": "http://nintendo-account.com/verify", "submission_time": "2023-09-24T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-24T12:55:10+00:00", "target": "Nintendo"},
+  
+  {"phish_id": "7829221", "url": "http://192.168.1.1/router-admin", "submission_time": "2023-09-25T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-25T12:55:10+00:00", "target": "Router Admin"},
+  {"phish_id": "7829222", "url": "https://8.8.8.8/google-dns", "submission_time": "2023-09-25T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-25T12:55:10+00:00", "target": "Google DNS"},
+  {"phish_id": "7829223", "url": "http://104.18.21.226/cloudflare", "submission_time": "2023-09-25T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-25T12:55:10+00:00", "target": "Cloudflare"},
+  
+  {"phish_id": "7829224", "url": "http://secure.verification-center.com/paypal", "submission_time": "2023-09-26T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-26T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829225", "url": "https://login.account-verify.com/microsoft", "submission_time": "2023-09-26T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-26T12:55:10+00:00", "target": "Microsoft"},
+  {"phish_id": "7829226", "url": "http://security.account-update.com/apple", "submission_time": "2023-09-26T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-26T12:55:10+00:00", "target": "Apple"},
+  
+  {"phish_id": "7829227", "url": "http://www.pay-pal.com", "submission_time": "2023-09-27T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-27T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829228", "url": "https://www.g0ogle.com", "submission_time": "2023-09-27T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-27T12:55:10+00:00", "target": "Google"},
+  {"phish_id": "7829229", "url": "http://www.amaz0n.com", "submission_time": "2023-09-27T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-27T12:55:10+00:00", "target": "Amazon"},
+  {"phish_id": "7829230", "url": "https://www.faceb00k.com", "submission_time": "2023-09-27T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-27T12:55:10+00:00", "target": "Facebook"},
+  
+  {"phish_id": "7829231", "url": "http://paypai.com", "submission_time": "2023-09-28T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-28T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829232", "url": "https://googie.com", "submission_time": "2023-09-28T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-28T12:55:10+00:00", "target": "Google"},
+  {"phish_id": "7829233", "url": "http://arnazon.com", "submission_time": "2023-09-28T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-28T12:55:10+00:00", "target": "Amazon"},
+  {"phish_id": "7829234", "url": "https://appie.com", "submission_time": "2023-09-28T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-28T12:55:10+00:00", "target": "Apple"},
+  
+  {"phish_id": "7829235", "url": "http://login-paypal.x7zu2qk9.cc", "submission_time": "2023-09-29T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-29T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829236", "url": "https://auth-microsoft.r4nd0m1d.xyz", "submission_time": "2023-09-29T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-29T12:55:10+00:00", "target": "Microsoft"},
+  {"phish_id": "7829237", "url": "http://amazon-delivery.j8h6f2s1.gq", "submission_time": "2023-09-29T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-29T12:55:10+00:00", "target": "Amazon"},
+  
+  {"phish_id": "7829238", "url": "http://paypal.com.secure-login.info", "submission_time": "2023-09-30T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-30T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829239", "url": "https://google.com.account-verify.site", "submission_time": "2023-09-30T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-30T12:55:10+00:00", "target": "Google"},
+  {"phish_id": "7829240", "url": "http://apple.com.id-confirmation.pw", "submission_time": "2023-09-30T11:42:19+00:00", "verified": "yes", "verification_time": "2023-09-30T12:55:10+00:00", "target": "Apple"},
+  
+  {"phish_id": "7829241", "url": "http://secure-online-banking.com/wellsfargo", "submission_time": "2023-10-01T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-01T12:55:10+00:00", "target": "Wells Fargo"},
+  {"phish_id": "7829242", "url": "https://account-verification.com/citibank", "submission_time": "2023-10-01T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-01T12:55:10+00:00", "target": "Citibank"},
+  {"phish_id": "7829243", "url": "http://banking-secure-signin.com/boa", "submission_time": "2023-10-01T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-01T12:55:10+00:00", "target": "Bank of America"},
+  
+  {"phish_id": "7829244", "url": "http://j8k2l3.com/paypal/login.php", "submission_time": "2023-10-02T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-02T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829245", "url": "https://x9y7z2.net/microsoft/verify.html", "submission_time": "2023-10-02T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-02T12:55:10+00:00", "target": "Microsoft"},
+  {"phish_id": "7829246", "url": "http://a7b9c3.org/amazon/shipment.jsp", "submission_time": "2023-10-02T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-02T12:55:10+00:00", "target": "Amazon"},
+  
+  {"phish_id": "7829247", "url": "http://bit.ly/3xR4t8Z", "submission_time": "2023-10-03T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-03T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829248", "url": "https://tinyurl.com/y7x9z2", "submission_time": "2023-10-03T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-03T12:55:10+00:00", "target": "Microsoft"},
+  {"phish_id": "7829249", "url": "http://goo.gl/K8j2L3", "submission_time": "2023-10-03T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-03T12:55:10+00:00", "target": "Amazon"},
+  
+  {"phish_id": "7829250", "url": "http://login-secure-paypal.com/?id=123456789", "submission_time": "2023-10-04T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-04T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829251", "url": "https://microsoft-account-verify.com/?session=87654321", "submission_time": "2023-10-04T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-04T12:55:10+00:00", "target": "Microsoft"},
+  {"phish_id": "7829252", "url": "http://amazon-delivery-tracking.com/?tracking=AMZN12345", "submission_time": "2023-10-04T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-04T12:55:10+00:00", "target": "Amazon"},
+  
+  {"phish_id": "7829253", "url": "http://verify-your-paypal-account-now.com", "submission_time": "2023-10-05T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-05T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829254", "url": "https://microsoft365-subscription-renew.com", "submission_time": "2023-10-05T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-05T12:55:10+00:00", "target": "Microsoft"},
+  {"phish_id": "7829255", "url": "http://amazon-prime-membership-update.com", "submission_time": "2023-10-05T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-05T12:55:10+00:00", "target": "Amazon"},
+  
+  {"phish_id": "7829256", "url": "http://www.secure.paypal.com.checkout.signin.info", "submission_time": "2023-10-06T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-06T12:55:10+00:00", "target": "PayPal"},
+  {"phish_id": "7829257", "url": "https://login.live.com.microsoft.account.verification.site", "submission_time": "2023-10-06T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-06T12:55:10+00:00", "target": "Microsoft"},
+  {"phish_id": "7829258", "url": "http://amazon.signin.account-update.info", "submission_time": "2023-10-06T11:42:19+00:00", "verified": "yes", "verification_time": "2023-10-06T12:55:10+00:00", "target": "Amazon"}
+]

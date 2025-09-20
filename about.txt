@@ -1,0 +1,191 @@
+# PhishGuard: Comprehensive Phishing URL Detection System
+
+## Overview
+
+PhishGuard is a sophisticated cybersecurity web application designed to analyze and detect phishing URLs using multiple verification techniques including machine learning models, homograph attack detection, domain reliability assessment, and external API verification. The system provides a detailed security report for each analyzed URL, highlighting potential risks and security concerns.
+
+## System Architecture
+
+### Frontend Technology Stack
+
+- **Framework**: Next.js 14.0.0 with React 18.2.0
+- **Styling**: Tailwind CSS 3.3.3 with custom cybersecurity-themed design
+- **HTTP Client**: Axios 1.5.0 for API communication
+- **Data Visualization**: Chart.js 4.4.0 with React-ChartJS-2 5.2.0
+- **Icons**: React-Icons 4.11.0 for cybersecurity-themed iconography
+- **Build Tools**: PostCSS 8.4.30 and Autoprefixer 10.4.16
+- **Development Tools**: TypeScript 5.2.2, ESLint 8.49.0
+
+### Backend Technology Stack
+
+- **Framework**: Flask (Python) with Flask-CORS for cross-origin resource sharing
+- **Machine Learning**: XGBoost, Scikit-learn (RandomForest, GradientBoosting classifiers)
+- **Data Processing**: NumPy, Pandas for feature extraction and data manipulation
+- **Web Security**: Levenshtein for string similarity, DNS resolver for domain validation
+- **External APIs Integration**: PhishTank API, Google Safe Browsing API
+- **Database**: SQLAlchemy with support for both SQLite and PostgreSQL
+- **Environment Management**: python-dotenv for configuration
+- **Web Scraping**: BeautifulSoup4 for HTML content analysis when available
+
+## Phishing Detection Techniques
+
+PhishGuard employs multiple layers of security checks to analyze URLs for phishing indicators:
+
+### 1. Machine Learning-Based Detection
+
+The system uses two primary ML models:
+
+#### A. UCI Random Forest Model
+- Based on a curated dataset of phishing and legitimate URLs
+- Uses 30 engineered features focusing on URL structure and content
+- Provides binary classification with confidence scores
+- Features include URL length, number of subdomains, special character frequency, etc.
+
+#### B. Advanced XGBoost Model
+- Uses 60+ advanced features for higher precision
+- Trained on larger, more recent phishing datasets
+- Includes semantic analysis and brand impersonation detection
+- Optimized for higher recall on new phishing patterns
+
+### 2. Homograph Attack Detection
+
+Homograph attacks use visually similar characters to trick users. Our detection:
+
+- Implements character skeletonization to normalize look-alike characters
+- Maps similar-looking characters to their base form (e.g., '0' → 'o', 'rnicrosoft' → 'microsoft')
+- Maintains an extensive database of commonly targeted brands and domains
+- Detects international character substitutions (e.g., Cyrillic characters in Latin domains)
+- Assigns severity ratings based on the extent of character substitution
+
+### 3. Domain Reliability Assessment
+
+Evaluates the trustworthiness of a domain through multiple checks:
+
+- DNS record verification (A, MX, TXT, NS records)
+- WHOIS data analysis (registration date, expiration, registrar information)
+- SSL certificate validation (presence, expiration, issuer reputation)
+- Domain age assessment (newly registered domains receive higher scrutiny)
+- Hosting IP reputation check against known malicious hosting providers
+- TTL (Time to Live) values assessment for DNS records
+
+### 4. URL Structure Analysis
+
+Examines URLs for suspicious patterns:
+
+- Suspicious TLD detection (.xyz, .tk, .ml, etc. which are often abused)
+- URL length analysis (excessively long URLs are flagged)
+- Subdomain analysis (excessive subdomains or unusual patterns)
+- Path analysis for suspicious directories or file extensions
+- Query parameter examination for data exfiltration patterns
+- URL encoding analysis for attempts to obfuscate malicious parameters
+
+### 5. External API Verification
+
+Leverages trusted third-party security services:
+
+- PhishTank API integration to check against known phishing URLs
+- Google Safe Browsing API to verify against Google's threat database
+- Reputation database cross-referencing for comprehensive coverage
+
+### 6. Anomaly/Outlier Detection
+
+Uses statistical methods to identify URLs that deviate from normal patterns:
+
+- Isolation Forest algorithm to detect outliers in URL feature space
+- Calculates anomaly scores based on statistical deviation from legitimate URLs
+- Identifies unusual combinations of features that may indicate new phishing techniques
+
+### 7. Content Analysis (When Available)
+
+For accessible websites, analyzes the actual page content:
+
+- Forms detection (login forms, password fields)
+- Brand logo detection for impersonation attempts
+- JavaScript analysis for suspicious redirects or behavior
+- Metadata examination for inconsistencies
+- Link destination analysis to detect misleading buttons/links
+
+## Feature Engineering
+
+The system extracts and analyzes numerous features from URLs, including:
+
+### Basic URL Features
+- Domain length, URL length
+- Number of dots, dashes, digits in domain
+- TLD type and reputation
+- Presence of IP addresses instead of domains
+- Subdomain count and structure
+
+### Advanced Semantic Features
+- Levenshtein distance to popular brands
+- Domain entropy (randomness measure)
+- N-gram analysis of domain name
+- Character distribution patterns
+- Brand term proximity detection
+
+### Security-Related Features
+- HTTPS usage and certificate validity
+- Redirection count and patterns
+- Domain age and registration details
+- DNS configuration completeness
+- Hosting provider reputation
+
+## User Interface
+
+The PhishGuard UI is designed with a modern cybersecurity aesthetic:
+
+- Dark-themed interface with glowing blue accents for a security operations center feel
+- Intuitive URL input and analysis interface
+- Comprehensive security report with visual indicators
+- Detailed breakdown of detected issues and technical explanations
+- Security recommendation based on overall analysis
+- Mobile-responsive design for security checks on any device
+
+## Data Flow
+
+1. User submits a URL through the frontend interface
+2. Frontend validates basic URL structure and forwards to backend API
+3. Backend performs multi-layered analysis:
+   - Extracts URL features for ML models
+   - Checks against external security APIs
+   - Performs homograph and domain reliability checks
+   - Calculates anomaly scores
+4. Results are compiled into a comprehensive security report
+5. Frontend displays the analysis with appropriate security indicators
+6. Results are optionally stored in the database for trend analysis
+
+## Continuous Improvement
+
+PhishGuard continuously improves its detection capabilities through:
+
+- Regular updates to phishing pattern databases
+- Model retraining with new phishing examples
+- User feedback on false positives/negatives
+- Integration of emerging threat intelligence
+- Security research incorporation for new phishing techniques
+
+## Technological Challenges and Solutions
+
+### Challenge: Homograph Detection
+**Solution**: Implemented character skeletonization to normalize visually similar characters and detect sophisticated impersonation attempts.
+
+### Challenge: Keeping Up with New Phishing Techniques
+**Solution**: Combined traditional ML approaches with anomaly detection to identify previously unseen patterns that deviate from legitimate URL behavior.
+
+### Challenge: False Positives
+**Solution**: Multi-layered verification approach where individual checks are weighted and combined for a final verdict, reducing false positive rates.
+
+### Challenge: Processing Speed
+**Solution**: Optimized feature extraction pipeline and implemented caching for repeated checks of similar domains.
+
+## Privacy Considerations
+
+- No personal user data is stored
+- URL analysis is performed server-side for security
+- Optional anonymization of submitted URLs in database
+- Transparency in explaining all detection methods
+- No third-party tracking in the analysis process
+
+## Conclusion
+
+PhishGuard represents a comprehensive approach to phishing URL detection, combining traditional security techniques with modern machine learning approaches. Its multi-layered verification system provides users with a robust defense against increasingly sophisticated phishing attempts while maintaining a user-friendly interface and detailed educational explanations.

@@ -1,0 +1,14 @@
+# Sample URLs for testing the Phishing Detection API
+# Legitimate URLs
+https://google.com
+https://microsoft.com
+https://github.com
+https://example.com
+https://wikipedia.org
+
+# Potentially suspicious URLs (for testing)
+http://amaz0n-security-alert.com
+http://paypa1-account-verify.net
+http://g00gle-docs-sign.com
+http://faceb00k-security-check.com
+http://banking-secure-login.com
