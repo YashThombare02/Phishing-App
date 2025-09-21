@@ -67,7 +67,7 @@ const HomePage: React.FC = () => {
         // Try one more time
         const isHealthy = await checkApiHealth();
         if (!isHealthy) {
-          setError('Unable to connect to the analysis server. Please ensure the backend is running at http://localhost:5000.');
+          setError('Unable to connect to the analysis server. Please ensure the backend is running and accessible.');
           return;
         } else {
           setApiAvailable(true);
@@ -107,7 +107,8 @@ const HomePage: React.FC = () => {
       
       // Simple ping test before calling the main API
       try {
-        await fetch(`${window.location.protocol}//${window.location.hostname}:5000/api/stats`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || `${window.location.protocol}//${window.location.hostname}:5000/api`;
+        await fetch(`${apiUrl}/stats`, {
           method: 'HEAD',
           mode: 'no-cors'
         });
@@ -136,7 +137,7 @@ const HomePage: React.FC = () => {
       if (err.message?.includes('No response from server') || 
           err.message?.includes('Backend server appears to be offline') || 
           err.message?.includes('Network Error')) {
-        setError('Unable to connect to the analysis server. Please ensure the backend is running and accessible at http://localhost:5000.');
+        setError('Unable to connect to the analysis server. Please ensure the backend is running and accessible.');
       } else if (err.response?.status === 500) {
         setError('The server encountered an error while analyzing the URL. Please try again later.');
       } else if (err.response?.data?.error) {
@@ -199,7 +200,7 @@ const HomePage: React.FC = () => {
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
                 <p className="ml-3 text-sm text-cyber-warning">
-                  Backend API not available. Please ensure the server is running at http://localhost:5000.
+                  Backend API not available. Please ensure the server is running and accessible.
                 </p>
               </div>
             </div>

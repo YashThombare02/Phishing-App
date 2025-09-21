@@ -54,7 +54,8 @@ warnings.filterwarnings('ignore')
 # Initialize Flask app
 app = Flask(__name__)
 # Enable CORS with more specific configuration
-CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*')
+CORS(app, resources={r"/api/*": {"origins": CORS_ORIGINS}}, supports_credentials=True)
 
 # Load environment variables
 load_dotenv()
@@ -3156,4 +3157,6 @@ threading.Thread(target=startup).start()
 
 # Main entry point
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV', 'production').lower() != 'production'
+    app.run(debug=debug, host='0.0.0.0', port=port)

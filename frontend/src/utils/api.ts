@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Define the base URL for API requests
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 console.log('API base URL is configured as:', API_BASE_URL);
 
 // Add a timeout to prevent hanging requests
