@@ -424,7 +424,7 @@ const StatisticsPage: React.FC = () => {
     <Layout activePage="stats">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white font-cyber">
+          <h1 className="text-3xl font-bold text-gray-900">
             Detection Statistics
           </h1>
           <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-500">
@@ -453,7 +453,7 @@ const StatisticsPage: React.FC = () => {
         {showReportModal && <ReportModal />}
 
         {stats && !loading && (
-          <div className="mt-10 max-w-5xl mx-auto">
+          <div className="mt-10 max-w-7xl mx-auto">
             {/* Summary Cards */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -547,175 +547,339 @@ const StatisticsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Charts */}
-            <div className="mt-8 bg-white shadow rounded-lg p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">URL Analysis Breakdown</h2>
-                <button 
-                  onClick={fetchLatestStatistics} 
-                  className="px-3 py-1 bg-primary-100 text-primary-600 rounded hover:bg-primary-200 flex items-center"
-                  disabled={loading}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  {loading ? 'Refreshing...' : 'Refresh'}
-                </button>
-              </div>
-              
-              <div className="flex justify-center mb-6">
-                <div className="relative h-64 w-64">
-                  {/* Simple pie chart visualization */}
-                  {loading ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg className="animate-spin h-12 w-12 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    </div>
-                  ) : stats ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg viewBox="0 0 36 36" className="h-full w-full">
-                        <circle 
-                          cx="18" 
-                          cy="18" 
-                          r="15.91549430918954" 
-                          fill="transparent" 
-                          stroke="#d1d5db" 
-                          strokeWidth="3" 
-                        />
-                        <circle 
-                          cx="18" 
-                          cy="18" 
-                          r="15.91549430918954" 
-                          fill="transparent" 
-                          stroke="#ef4444" 
-                          strokeWidth="3" 
-                          strokeDasharray={`${stats.phishing_percentage} ${100 - stats.phishing_percentage}`}
-                          strokeDashoffset="25" 
-                        />
-                      </svg>
-                      <div className="absolute flex flex-col items-center justify-center">
-                        <span className="text-3xl font-bold">{stats.phishing_percentage.toFixed(1)}%</span>
-                        <span className="text-sm text-gray-500">Phishing</span>
+            {/* Main Content - Two Cards Side by Side */}
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* URL Search History Card - Left Side (Larger) */}
+              <div className="lg:col-span-7 bg-white shadow rounded-lg overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-gray-900">
+                      <FaTable className="inline-block mr-2 mb-1" />
+                      URL Search History
+                    </h2>
+                    <div className="flex items-center space-x-2">
+                      <div className="relative inline-block text-left">
+                        <select
+                          className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
+                          value={filter}
+                          onChange={(e) => {
+                            setFilter(e.target.value);
+                            setCurrentPage(1); // Reset to first page when filter changes
+                          }}
+                        >
+                          <option value="all">All URLs</option>
+                          <option value="phishing">Phishing Only</option>
+                          <option value="safe">Safe Only</option>
+                        </select>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <p className="text-gray-500">No data available</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {renderTLDChart()}
-                
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Detections</h3>
-                  {loading ? (
-                    <div className="py-4 text-center text-gray-500">
-                      <svg className="animate-spin h-6 w-6 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Loading latest detections...
-                    </div>
-                  ) : stats.recent_detections && stats.recent_detections.length > 0 ? (
-                    <ul className="divide-y divide-gray-200">
-                      {stats.recent_detections.slice(0, 4).map((detection, index) => (
-                        <li key={index} className="py-3">
-                          <div className="flex items-center">
-                            <div className={`w-2 h-2 rounded-full mr-3 ${detection.is_phishing ? 'bg-danger-500' : 'bg-success-500'}`}></div>
-                            <div className="flex-1 truncate">
-                              <p className="text-sm font-medium text-gray-900 truncate">{detection.url}</p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(detection.timestamp).toLocaleString()}
-                              </p>
-                            </div>
-                            <div className={`px-2 py-1 text-xs rounded-full ${detection.is_phishing ? 'bg-danger-100 text-danger-800' : 'bg-success-100 text-success-800'}`}>
-                              {detection.is_phishing ? 'Phishing' : 'Safe'}
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500">No recent detections found.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            {/* URL History Table */}
-            <div className="mt-10 bg-white shadow rounded-lg overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-gray-900">
-                    <FaTable className="inline-block mr-2 mb-1" />
-                    URL Search History
-                  </h2>
-                  <div className="flex items-center space-x-2">
-                    <div className="relative inline-block text-left">
-                      <select
-                        className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
-                        value={filter}
-                        onChange={(e) => {
-                          setFilter(e.target.value);
-                          setCurrentPage(1); // Reset to first page when filter changes
-                        }}
-                      >
-                        <option value="all">All URLs</option>
-                        <option value="phishing">Phishing Only</option>
-                        <option value="safe">Safe Only</option>
-                      </select>
                     </div>
                   </div>
                 </div>
+
+                {historyLoading ? (
+                  <div className="px-6 py-10 text-center">
+                    <Loading message="Loading search history..." />
+                  </div>
+                ) : historyError ? (
+                  <div className="px-6 py-4 text-danger-600">
+                    <FaExclamationTriangle className="inline-block mr-2" />
+                    {historyError}
+                  </div>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                              ID
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
+                              URL
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                              Status
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
+                              <FaCalendarAlt className="inline-block mr-1" /> 
+                              Date & Time
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                              Score
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                              Report
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {searchHistory.length > 0 ? (
+                            searchHistory.map((record) => (
+                              <tr key={record.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  #{record.id}
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="text-sm font-medium text-gray-900 truncate max-w-xs" title={record.url}>
+                                    {record.url}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                    record.is_phishing 
+                                      ? 'bg-danger-100 text-danger-800' 
+                                      : 'bg-success-100 text-success-800'
+                                  }`}>
+                                    {record.is_phishing ? 'Phishing' : 'Safe'}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {new Date(record.timestamp).toLocaleString()}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {record.score !== undefined && (
+                                    <div className="flex items-center space-x-2">
+                                      <div className="w-12 h-2.5 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
+                                        <div 
+                                          className={`h-2.5 rounded-full ${
+                                            record.is_phishing ? 'bg-danger-600' : 'bg-success-600'
+                                          }`}
+                                          style={{ width: `${Math.min(record.score, 100)}%` }}
+                                        ></div>
+                                      </div>
+                                      <span className="text-xs text-gray-500 flex-shrink-0">
+                                        {Math.min(Math.round(record.score), 100)}%
+                                      </span>
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedRecord(record);
+                                      setShowReportModal(true);
+                                    }}
+                                    className="text-primary-600 hover:text-primary-900 bg-primary-50 px-3 py-1 rounded-md"
+                                  >
+                                    View
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
+                                No URL history found. Analyze a URL to see it appear here.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200">
+                        <div className="flex-1 flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-gray-700">
+                              Showing <span className="font-medium">{((currentPage - 1) * recordsPerPage) + 1}</span> to{' '}
+                              <span className="font-medium">
+                                {Math.min(currentPage * recordsPerPage, searchHistory.length)}
+                              </span>{' '}
+                              of <span className="font-medium">{searchHistory.length}</span> results
+                            </p>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                              <button
+                                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                disabled={currentPage === 1}
+                                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                                  currentPage === 1 
+                                    ? 'text-gray-300 cursor-not-allowed' 
+                                    : 'text-gray-500 hover:bg-gray-50'
+                                }`}
+                              >
+                                <span className="sr-only">Previous</span>
+                                &larr;
+                              </button>
+                              
+                              {(() => {
+                                // Logic to show limited page numbers
+                                let pages: (number | string)[] = [];
+                                const maxPageButtons = 5; // Show max 5 page buttons at once
+                                
+                                if (totalPages <= maxPageButtons) {
+                                  // If total pages are less than max buttons, show all pages
+                                  pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+                                } else {
+                                  // Always include first and last page
+                                  // And pages around current page
+                                  const startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+                                  const endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+                                  
+                                  pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+                                  
+                                  // Add ellipsis if needed
+                                  if (startPage > 1) {
+                                    pages.unshift(1);
+                                    if (startPage > 2) pages.splice(1, 0, "ellipsis-1"); 
+                                  }
+                                  
+                                  if (endPage < totalPages) {
+                                    if (endPage < totalPages - 1) pages.push("ellipsis-2");
+                                    pages.push(totalPages);
+                                  }
+                                }
+                                
+                                return pages.map((page, index) => {
+                                  if (typeof page === 'string' && page.startsWith('ellipsis')) {
+                                    return (
+                                      <span key={page} className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                        ...
+                                      </span>
+                                    );
+                                  }
+                                  
+                                  return (
+                                    <button
+                                      key={index}
+                                      onClick={() => setCurrentPage(page as number)}
+                                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                                        currentPage === page
+                                          ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
+                                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                                      }`}
+                                    >
+                                      {page}
+                                    </button>
+                                  );
+                                });
+                              })()}
+                              
+                              <button
+                                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                disabled={currentPage === totalPages}
+                                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                                  currentPage === totalPages 
+                                    ? 'text-gray-300 cursor-not-allowed' 
+                                    : 'text-gray-500 hover:bg-gray-50'
+                                }`}
+                              >
+                                <span className="sr-only">Next</span>
+                                &rarr;
+                              </button>
+                            </nav>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
-              {historyLoading ? (
-                <div className="px-6 py-10 text-center">
-                  <Loading message="Loading search history..." />
+              {/* URL Analysis Breakdown Card - Right Side (Smaller) */}
+              <div className="lg:col-span-5 bg-white shadow rounded-lg p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">URL Analysis Breakdown</h2>
+                  <button 
+                    onClick={fetchLatestStatistics} 
+                    className="px-3 py-1 bg-primary-100 text-primary-600 rounded hover:bg-primary-200 flex items-center"
+                    disabled={loading}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    {loading ? 'Refreshing...' : 'Refresh'}
+                  </button>
                 </div>
-              ) : historyError ? (
-                <div className="px-6 py-4 text-danger-600">
-                  <FaExclamationTriangle className="inline-block mr-2" />
-                  {historyError}
+                
+                <div className="flex justify-center mb-6">
+                  <div className="relative h-64 w-64">
+                    {/* Simple pie chart visualization */}
+                    {loading ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg className="animate-spin h-12 w-12 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </div>
+                    ) : stats ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg viewBox="0 0 36 36" className="h-full w-full">
+                          <circle 
+                            cx="18" 
+                            cy="18" 
+                            r="15.91549430918954" 
+                            fill="transparent" 
+                            stroke="#d1d5db" 
+                            strokeWidth="3" 
+                          />
+                          <circle 
+                            cx="18" 
+                            cy="18" 
+                            r="15.91549430918954" 
+                            fill="transparent" 
+                            stroke="#ef4444" 
+                            strokeWidth="3" 
+                            strokeDasharray={`${stats.phishing_percentage} ${100 - stats.phishing_percentage}`}
+                            strokeDashoffset="25" 
+                          />
+                        </svg>
+                        <div className="absolute flex flex-col items-center justify-center">
+                          <span className="text-3xl font-bold">{stats.phishing_percentage.toFixed(1)}%</span>
+                          <span className="text-sm text-gray-500">Phishing</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <p className="text-gray-500">No data available</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
-                            ID
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
-                            URL
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                            Status
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
-                            <FaCalendarAlt className="inline-block mr-1" /> 
-                            Date & Time
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                            Score
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                            Report
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {searchHistory.length > 0 ? (
-                          searchHistory.map((record) => (
-                            <tr key={record.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                #{record.id}
+                
+                <div className="space-y-6">
+                  {renderTLDChart()}
+                  
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Detections</h3>
+                    {loading ? (
+                      <div className="py-4 text-center text-gray-500">
+                        <svg className="animate-spin h-6 w-6 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading latest detections...
+                      </div>
+                    ) : stats.recent_detections && stats.recent_detections.length > 0 ? (
+                      <ul className="divide-y divide-gray-200">
+                        {stats.recent_detections.slice(0, 5).map((detection, index) => (
+                          <li key={index} className="py-3">
+                            <div className="flex items-center">
+                              <div className={`w-2 h-2 rounded-full mr-3 ${detection.is_phishing ? 'bg-danger-500' : 'bg-success-500'}`}></div>
+                              <div className="flex-1 truncate">
+                                <p className="text-sm font-medium text-gray-900 truncate">{detection.url}</p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(detection.timestamp).toLocaleString()}
+                                </p>
+                              </div>
+                              <div className={`px-2 py-1 text-xs rounded-full ${detection.is_phishing ? 'bg-danger-100 text-danger-800' : 'bg-success-100 text-success-800'}`}>
+                                {detection.is_phishing ? 'Phishing' : 'Safe'}
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-500">No recent detections found.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
                               </td>
                               <td className="px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900 truncate max-w-xs" title={record.url}>

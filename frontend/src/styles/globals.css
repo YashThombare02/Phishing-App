@@ -12,6 +12,34 @@ body {
   background: rgb(var(--background-rgb));
 }
 
+.cyber-input-border {
+  position: relative;
+}
+
+.cyber-input-border input {
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  transition: border-color 0.3s ease;
+}
+
+.cyber-input-border input:focus {
+  border-color: rgba(0, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.cyber-input-border::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid transparent;
+  border-radius: 0.375rem 0 0 0.375rem;
+  background: linear-gradient(90deg, #00ffff, transparent 25%, transparent 75%, #00ffff) border-box;
+  z-index: 1;
+  pointer-events: none;
+}
+
 @layer components {
   .btn {
     @apply px-4 py-2 rounded-md font-medium transition-all duration-200;

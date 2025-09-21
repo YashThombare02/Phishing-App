@@ -158,7 +158,9 @@ class Report(Base):
     url = Column(String, nullable=False)
     domain = Column(String, nullable=False)
     description = Column(Text)
-    status = Column(String, default='pending')
+    username = Column(String)
+    submitter_ip = Column(String)
+    status = Column(String, default='phishing')
     timestamp = Column(DateTime, default=datetime.utcnow)
 
 # Engine and session setup
@@ -167,6 +169,13 @@ Session = sessionmaker(bind=engine)
 
 # Database initialization
 def init_db():
+    # Create all tables
+    Base.metadata.create_all(engine)
+
+# Reset the database schema (for development only)
+def reset_db():
+    # Drop all tables
+    Base.metadata.drop_all(engine)
     # Create all tables
     Base.metadata.create_all(engine)
 
@@ -2840,15 +2849,22 @@ def get_statistics():
         
         # Get common TLDs using SQLAlchemy
         from sqlalchemy import func, desc
-        from sqlalchemy.sql.expression import text
         
-        # This query extracts the TLD from the domain and counts occurrences
-        tld_query = session.query(
-            text("substring(domain from position('.' in domain) + 1 for length(domain))").label("tld"),
-            func.count().label("count")
-        ).group_by(text("tld")).order_by(desc("count")).limit(10)
+        # Extract TLDs in a database-agnostic way
+        tlds = {}
+        domains = [row[0] for row in session.query(Detection.domain).all()]
         
-        tlds = {row.tld: row.count for row in tld_query.all()}
+        # Extract TLDs manually
+        all_tlds = []
+        for domain in domains:
+            parts = domain.split('.')
+            if len(parts) > 1:
+                all_tlds.append(parts[-1])
+        
+        # Count TLDs
+        tld_counter = Counter(all_tlds)
+        # Convert to dict and get top 10
+        tlds = dict(tld_counter.most_common(10))
         
         # Get recent detections
         recent_query = session.query(Detection).order_by(Detection.timestamp.desc()).limit(10)
@@ -2873,6 +2889,65 @@ def get_statistics():
             'recent_detections': recent
         })
     except Exception as e:
+        print(f"Error in statistics endpoint: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/statistics_v2', methods=['GET'])
+def get_statistics_v2():
+    """Alternative endpoint to get detection statistics with better compatibility"""
+    try:
+        # Create a new session
+        session = Session()
+        
+        # Get total counts
+        total_count = session.query(Detection).count()
+        phishing_count = session.query(Detection).filter(Detection.is_phishing == True).count()
+        
+        legitimate_count = total_count - phishing_count
+        
+        # Calculate percentages
+        phishing_percentage = (phishing_count / total_count * 100) if total_count > 0 else 0
+        legitimate_percentage = (legitimate_count / total_count * 100) if total_count > 0 else 0
+        
+        # Get all domains
+        domains = [row[0] for row in session.query(Detection.domain).all()]
+        
+        # Process TLDs manually
+        tlds = {}
+        for domain in domains:
+            # Use tldextract for more reliable TLD extraction
+            ext = tldextract.extract(domain)
+            tld = ext.suffix
+            if tld:
+                tlds[tld] = tlds.get(tld, 0) + 1
+        
+        # Sort and limit to top 10
+        tlds = dict(sorted(tlds.items(), key=lambda x: x[1], reverse=True)[:10])
+        
+        # Get recent detections
+        recent_query = session.query(Detection).order_by(Detection.timestamp.desc()).limit(10)
+        recent = [
+            {
+                'url': detection.url, 
+                'is_phishing': detection.is_phishing, 
+                'timestamp': detection.timestamp.isoformat()
+            } 
+            for detection in recent_query.all()
+        ]
+        
+        session.close()
+        
+        return jsonify({
+            'total_urls_analyzed': total_count,
+            'phishing_percentage': phishing_percentage,
+            'legitimate_percentage': legitimate_percentage,
+            'total_phishing': phishing_count,
+            'total_legitimate': legitimate_count,
+            'common_tlds': tlds,
+            'recent_detections': recent
+        })
+    except Exception as e:
+        print(f"Error in statistics_v2 endpoint: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/report', methods=['POST'])
@@ -2882,6 +2957,7 @@ def report_phishing():
         data = request.get_json()
         url = data.get('url', '')
         description = data.get('description', '')
+        username = data.get('username', 'Anonymous')
         
         if not url:
             return jsonify({'error': 'No URL provided'}), 400
@@ -2897,7 +2973,9 @@ def report_phishing():
             url=url,
             domain=domain,
             description=description,
-            status='pending'
+            username=username,
+            submitter_ip=request.remote_addr,
+            status='phishing'
         )
         
         # Add to the session and commit
@@ -2912,11 +2990,66 @@ def report_phishing():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+def format_timestamp(dt):
+    """Helper function to format timestamps consistently"""
+    if dt:
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
+    return None
+
+@app.route('/api/reports', methods=['GET'])
+def get_reports():
+    """Endpoint to get all submitted reports"""
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        limit = request.args.get('limit', 10, type=int)
+        
+        # Create a new session
+        session = Session()
+        
+        # Count total reports for pagination
+        total_records = session.query(Report).count()
+        
+        # Get reports with pagination
+        query = session.query(Report).order_by(Report.timestamp.desc())
+        query = query.limit(limit).offset((page - 1) * limit)
+        
+        # Get the reports
+        results = query.all()
+        
+        # Transform to dictionary format
+        reports = []
+        for report in results:
+            reports.append({
+                'id': report.id,
+                'url': report.url,
+                'domain': report.domain,
+                'description': report.description,
+                'username': report.username if hasattr(report, 'username') else 'Anonymous',
+                'timestamp': format_timestamp(report.timestamp),
+                'status': report.status
+            })
+        
+        # Calculate total pages
+        total_pages = (total_records + limit - 1) // limit if total_records > 0 else 1
+        
+        session.close()
+        
+        return jsonify({
+            'reports': reports,
+            'page': page,
+            'total_pages': total_pages,
+            'total_records': total_records
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # Initialize database and load models on startup
 def startup():
     print("Initializing PhishGuard...")
-    # Initialize database
-    init_db()
+    # Initialize database (don't reset in production)
+    print("Initializing database...")
+    init_db()  # Use init_db instead of reset_db to preserve data
     
     # Load models
     load_models()
@@ -2946,6 +3079,77 @@ def startup():
     load_models()
     
     print("API initialized successfully!")
+
+# Endpoint to get URL detection history with pagination and filtering
+@app.route('/api/search_history', methods=['GET'])
+def get_search_history():
+    """Endpoint to get URL detection history with pagination and filtering"""
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        limit = request.args.get('limit', 10, type=int)
+        filter_type = request.args.get('filter', 'all')
+        
+        # Create a new session
+        session = Session()
+        
+        # Base query
+        query = session.query(Detection)
+        
+        # Apply filtering
+        if filter_type == 'phishing':
+            query = query.filter(Detection.is_phishing == True)
+        elif filter_type == 'safe':
+            query = query.filter(Detection.is_phishing == False)
+        
+        # Count total matching records for pagination
+        total_records = query.count()
+        
+        # Apply pagination
+        query = query.order_by(Detection.timestamp.desc())
+        query = query.limit(limit).offset((page - 1) * limit)
+        
+        # Get the records
+        results = query.all()
+        
+        # Transform to dictionary format
+        history = []
+        for detection in results:
+            # Parse the JSON detection methods
+            detection_methods = json.loads(detection.detection_methods)
+            
+            # Extract reasons from detection methods
+            reasons = []
+            for method, details in detection_methods.items():
+                if details['result'] == (detection.is_phishing):  # Only include methods that contributed to the final decision
+                    reasons.append(details['description'])
+            
+            history.append({
+                'id': detection.id,
+                'url': detection.url,
+                'is_phishing': detection.is_phishing,
+                'timestamp': detection.timestamp.isoformat(),
+                'score': detection.confidence,
+                'report': {
+                    'reasons': reasons,
+                    'features': detection_methods  # Include detailed features for the report modal
+                }
+            })
+        
+        # Calculate total pages
+        total_pages = (total_records + limit - 1) // limit  # Ceiling division
+        
+        session.close()
+        
+        return jsonify({
+            'records': history,
+            'page': page,
+            'total_pages': total_pages,
+            'total_records': total_records,
+            'filter': filter_type
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Run startup in a separate thread to avoid blocking app startup
 threading.Thread(target=startup).start()

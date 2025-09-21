@@ -11,22 +11,19 @@ const Navbar: React.FC<NavbarProps> = ({ activePage }) => {
     { name: 'Home', path: '/', icon: <FaShieldAlt className="mr-2" />, active: activePage === 'home' },
     { name: 'About', path: '/about', icon: <FaInfoCircle className="mr-2" />, active: activePage === 'about' },
     { name: 'Stats', path: '/stats', icon: <FaDatabase className="mr-2" />, active: activePage === 'stats' },
-    { name: 'Batch Analysis', path: '/batch', icon: <FaDatabase className="mr-2" />, active: activePage === 'batch' },
     { name: 'Report Phishing', path: '/report', icon: <FaExclamationTriangle className="mr-2" />, active: activePage === 'report' }
   ];
 
   return (
     <nav className="bg-cyber-gradient shadow-cyber-glow border-b border-cyber-accent/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-0 px-0">
         <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="flex items-center">
-                <FaShieldAlt className="h-8 w-8 text-cyber-accent animate-pulse-glow" />
-                <span className="ml-2 text-xl font-bold text-white font-cyber">PhishGuard</span>
-              </Link>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center pl-4">
+              <FaShieldAlt className="h-8 w-8 text-cyber-accent animate-pulse-glow" />
+              <span className="ml-2 text-xl font-bold text-white font-cyber">PhishGuard</span>
+            </Link>
+            <div className="hidden sm:flex sm:space-x-8 sm:ml-10">
               {navItems.map((item) => (
                 <Link
                   key={item.name}

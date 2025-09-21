@@ -46,8 +46,8 @@ const PhishingAnalysisReport: React.FC<PhishingReportProps> = ({
   } // Default to empty arrays if undefined
 }) => {
   // Calculate confidence (0-100%)
-  // Fix the formatting issue with confidence by ensuring it's properly rounded to 2 decimal places
-  const confidence = parseFloat((Math.abs(score - 0.5) * 2 * 100).toFixed(2));
+  // Ensure it's properly capped at 100% and rounded to avoid weird values
+  const confidence = Math.min(parseFloat((Math.abs(score - 0.5) * 2 * 100).toFixed(2)), 100);
   
   // Determine severity class based on phishing score
   const getSeverityClass = () => {
@@ -116,6 +116,9 @@ const PhishingAnalysisReport: React.FC<PhishingReportProps> = ({
             <div>
               <p className="text-gray-400 text-sm mb-1">URL</p>
               <p className="text-white font-medium">{url}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Analyzed on {new Date().toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -124,8 +127,8 @@ const PhishingAnalysisReport: React.FC<PhishingReportProps> = ({
         <div className={`p-4 ${severityClass.lightBg} rounded-md mb-4 border border-gray-700`}>
           <p className={`font-medium ${severityClass.heading}`}>
             {isPhishing
-              ? `This URL has been classified as a phishing site with ${parseFloat((score * 100).toFixed(2))}% probability.`
-              : `This URL appears to be legitimate with ${parseFloat(((1 - score) * 100).toFixed(2))}% probability.`}
+              ? `This URL has been classified as a phishing site with ${Math.min(Math.round(score * 100), 100)}% probability.`
+              : `This URL appears to be legitimate with ${Math.min(Math.round((1 - score) * 100), 100)}% probability.`}
           </p>
         </div>
 

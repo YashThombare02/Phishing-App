@@ -83,7 +83,7 @@ const BatchAnalysis: React.FC = () => {
     <Layout activePage="batch">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-white font-cyber">
             Batch URL Analysis
           </h1>
           <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-500">

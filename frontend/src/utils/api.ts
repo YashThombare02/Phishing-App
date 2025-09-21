@@ -74,6 +74,19 @@ export interface StatisticsResponse {
   }[];
 }
 
+export interface SearchHistoryResponse {
+  records: {
+    id: number;
+    url: string;
+    is_phishing: boolean;
+    timestamp: string;
+    score?: number;
+  }[];
+  total: number;
+  page: number;
+  total_pages: number;
+}
+
 export interface AnalysisResult {
   url: string;
   isPhishing: boolean;
@@ -100,6 +113,23 @@ export interface AnalysisResult {
 export interface ReportResponse {
   success: boolean;
   message: string;
+}
+
+export interface Report {
+  id: number;
+  url: string;
+  domain: string;
+  description: string;
+  username: string;
+  timestamp: string;
+  status: string;
+}
+
+export interface ReportsResponse {
+  reports: Report[];
+  page: number;
+  total_pages: number;
+  total_records: number;
 }
 
 // API Health Check
@@ -176,20 +206,45 @@ export const getApiStats = async (): Promise<ApiStats> => {
 
 export const getStatistics = async (): Promise<StatisticsResponse> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/statistics`);
-    return response.data;
+    // First try the original endpoint
+    console.log('Trying to fetch statistics from primary endpoint...');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/statistics`);
+      console.log('Statistics fetch successful');
+      return response.data;
+    } catch (error) {
+      console.error('Error with primary statistics endpoint, trying fallback:', error);
+      
+      // If that fails, try the v2 endpoint
+      const fallbackResponse = await axios.get(`${API_BASE_URL}/statistics_v2`);
+      console.log('Fallback statistics fetch successful');
+      return fallbackResponse.data;
+    }
   } catch (error) {
-    console.error('Error getting statistics:', error);
+    console.error('Error getting statistics from both endpoints:', error);
     throw error;
   }
 };
 
-export const reportPhishingSite = async (url: string, description: string = ''): Promise<ReportResponse> => {
+export const reportPhishingSite = async (url: string, username: string = 'Anonymous', description: string = ''): Promise<ReportResponse> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/report`, { url, description });
+    const response = await axios.post(`${API_BASE_URL}/report`, { url, username, description });
     return response.data;
   } catch (error) {
     console.error('Error reporting phishing site:', error);
+    throw error;
+  }
+};
+
+export const getReports = async (page: number = 1, limit: number = 10): Promise<ReportsResponse> => {
+  try {
+    console.log('Fetching reports:', { page, limit });
+    const response = await axios.get(`${API_BASE_URL}/reports`, {
+      params: { page, limit }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching reports:', error);
     throw error;
   }
 };
@@ -279,5 +334,26 @@ export const analyzeUrl = async (url: string): Promise<AnalysisResult> => {
     } else {
       throw error;
     }
+  }
+};
+
+export const getSearchHistory = async (
+  page: number = 1, 
+  limit: number = 10, 
+  filter: string = 'all'
+): Promise<SearchHistoryResponse> => {
+  try {
+    console.log('Fetching search history with params:', { page, limit, filter });
+    
+    // Call the actual backend API
+    const response = await axios.get(`${API_BASE_URL}/search_history`, {
+      params: { page, limit, filter }
+    });
+    
+    console.log('Search history response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching search history:', error);
+    throw error;
   }
 };

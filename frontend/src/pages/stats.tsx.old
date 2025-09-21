@@ -1,0 +1,798 @@
+import React, { useState, useEffect } from 'react';
+import Layout from '@/components/Layout';
+import { getStatistics, getSearchHistory } from '@/utils/api';
+import Loading from '@/components/Loading';
+import { FaChartBar, FaExclamationTriangle, FaGlobe, FaSearch, FaTable, FaFilter, FaCalendarAlt } from 'react-icons/fa';
+
+interface Statistics {
+  total_urls_analyzed: number;
+  phishing_percentage: number;
+  legitimate_percentage: number;
+  total_phishing: number;
+  total_legitimate: number;
+  common_tlds: Record<string, number>;
+  recent_detections: {
+    url: string;
+    is_phishing: boolean;
+    timestamp: string;
+  }[];
+}
+
+interface SearchRecord {
+  id: number;
+  url: string;
+  is_phishing: boolean;
+  timestamp: string;
+  score?: number;
+  report?: {
+    reasons: string[];
+    features?: any;
+    detailedAnalysis?: any;
+  };
+}
+
+const StatisticsPage: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState<Statistics | null>(null);
+  const [searchHistory, setSearchHistory] = useState<SearchRecord[]>([]);
+  const [historyLoading, setHistoryLoading] = useState<boolean>(true);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [filter, setFilter] = useState<string>('all'); // 'all', 'phishing', 'safe'
+  const [selectedRecord, setSelectedRecord] = useState<SearchRecord | null>(null);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  
+  const recordsPerPage = 10;
+
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        const data = await getStatistics();
+        setStats(data);
+      } catch (err: any) {
+        console.error('Statistics API error:', err);
+        // Set mock statistics data as fallback
+        setStats(generateMockStatistics());
+        setError('Could not fetch live statistics. Using placeholder data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStatistics();
+  }, []);
+
+  // Generate mock statistics for fallback when API fails
+  const generateMockStatistics = (): Statistics => {
+    return {
+      total_urls_analyzed: 1285,
+      phishing_percentage: 24.6,
+      legitimate_percentage: 75.4,
+      total_phishing: 316,
+      total_legitimate: 969,
+      common_tlds: {
+        'com': 756,
+        'org': 198,
+        'net': 124,
+        'io': 67,
+        'xyz': 42,
+        'co': 35,
+        'info': 23,
+        'biz': 18,
+        'site': 12,
+        'online': 10
+      },
+      recent_detections: [
+        {
+          url: 'https://secure-login-account.com/verify',
+          is_phishing: true,
+          timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString() // 15 minutes ago
+        },
+        {
+          url: 'https://netflix.com/browse',
+          is_phishing: false,
+          timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString() // 45 minutes ago
+        },
+        {
+          url: 'https://amaz0n-secure-verification.xyz/login',
+          is_phishing: true,
+          timestamp: new Date(Date.now() - 1000 * 60 * 110).toISOString() // 110 minutes ago
+        },
+        {
+          url: 'https://google.com/search',
+          is_phishing: false,
+          timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString() // 3 hours ago
+        },
+        {
+          url: 'https://account-verify-secure.net/update',
+          is_phishing: true,
+          timestamp: new Date(Date.now() - 1000 * 60 * 240).toISOString() // 4 hours ago
+        }
+      ]
+    };
+  };
+
+  useEffect(() => {
+    const fetchSearchHistory = async () => {
+      setHistoryLoading(true);
+      try {
+        // Call the backend API
+        const data = await getSearchHistory(currentPage, recordsPerPage, filter);
+        
+        setSearchHistory(data.records);
+        setTotalPages(data.total_pages);
+        
+        setHistoryError(null);
+      } catch (err: any) {
+        console.error('Search history API error:', err);
+        setHistoryError('Could not fetch search history. ' + 
+          (err.response?.status === 404 
+            ? 'The search history endpoint is not available.' 
+            : err.message || 'Unknown error'));
+        
+        // Don't show any data if there's an error
+        setSearchHistory([]);
+        setTotalPages(1);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+    
+    fetchSearchHistory();
+  }, [currentPage, filter, recordsPerPage]);
+
+  // This function generates mock data for demonstration
+  // In a real application, this would come from the API
+  const generateMockSearchHistory = (): SearchRecord[] => {
+    const domains = [
+      'google.com', 'facebook.com', 'amazon.com', 'netflix.com', 'microsoft.com',
+      'g00gle.com', 'faceb00k.com', 'amaz0n.com', 'netfl1x.com', 'micr0s0ft.com',
+      'paypal-secure.com', 'login-account-verify.com', 'bank-verification.net',
+      'secure-payment.info', 'account-update.co', 'verification-required.xyz'
+    ];
+    
+    const phishingReasons = [
+      'Domain recently registered (less than 30 days old)',
+      'URL contains suspicious characters or numbers replacing letters',
+      'Domain mimics a well-known brand',
+      'Uses deceptive subdomain to appear legitimate',
+      'Contains keywords commonly associated with phishing',
+      'Flagged by PhishTank database',
+      'Identified by Google Safe Browsing API',
+      'Machine learning model detected suspicious patterns',
+      'Contains multiple redirects to hide actual destination',
+      'URL structure attempts to obfuscate the actual domain'
+    ];
+    
+    const safeReasons = [
+      'Domain has significant age and established history',
+      'Valid SSL certificate from trusted authority',
+      'Proper domain registration information',
+      'No suspicious patterns in URL structure',
+      'Not flagged by any security databases',
+      'Low risk score from machine learning models',
+      'Legitimate domain ownership verified',
+      'Clean reputation score from multiple sources',
+      'No suspicious redirects detected',
+      'No attempts to mimic trusted brands'
+    ];
+    
+    const mockData: SearchRecord[] = [];
+    
+    for (let i = 1; i <= 50; i++) {
+      const domainIndex = Math.floor(Math.random() * domains.length);
+      const isPhishing = domainIndex >= domains.length / 3; // Make some URLs phishing
+      const daysAgo = Math.floor(Math.random() * 30);
+      const hoursAgo = Math.floor(Math.random() * 24);
+      const minutesAgo = Math.floor(Math.random() * 60);
+      
+      const date = new Date();
+      date.setDate(date.getDate() - daysAgo);
+      date.setHours(date.getHours() - hoursAgo);
+      date.setMinutes(date.getMinutes() - minutesAgo);
+      
+      const score = isPhishing ? Math.random() * 0.7 + 0.3 : Math.random() * 0.3;
+      
+      // Generate a few random reasons for the verdict
+      const numReasons = Math.floor(Math.random() * 3) + 1;
+      const reasonsList = isPhishing ? phishingReasons : safeReasons;
+      const selectedReasons: string[] = [];
+      for (let j = 0; j < numReasons; j++) {
+        const randomIndex = Math.floor(Math.random() * reasonsList.length);
+        if (!selectedReasons.includes(reasonsList[randomIndex])) {
+          selectedReasons.push(reasonsList[randomIndex]);
+        }
+      }
+      
+      const url = `https://${domains[domainIndex]}/${Math.random().toString(36).substring(7)}`;
+      
+      mockData.push({
+        id: i,
+        url: url,
+        is_phishing: isPhishing,
+        timestamp: date.toISOString(),
+        score: score,
+        report: {
+          reasons: selectedReasons,
+          features: {
+            domain: url.split('/')[2],
+            usesHttps: url.startsWith('https'),
+            containsHyphens: url.includes('-'),
+            containsNumbers: /\d/.test(url),
+            suspiciousTld: isPhishing && Math.random() > 0.5
+          },
+          detailedAnalysis: {
+            suspiciousElements: isPhishing ? 
+              selectedReasons.map(r => `Warning: ${r}`) : 
+              ['No suspicious elements detected'],
+            technicalDetails: [
+              `Domain age: ${isPhishing ? 'Less than 30 days' : 'More than 1 year'}`,
+              `SSL Certificate: ${isPhishing ? 'Self-signed or missing' : 'Valid and trusted'}`,
+              `Risk score: ${Math.round(score * 100)}%`
+            ]
+          }
+        }
+      });
+    }
+    
+    // Sort by most recent first
+    return mockData.sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  };
+
+  const renderTLDChart = () => {
+    if (!stats?.common_tlds) return null;
+    
+    // Sort TLDs by count (descending)
+    const sortedTLDs = Object.entries(stats.common_tlds)
+      .sort(([, countA], [, countB]) => countB - countA)
+      .slice(0, 10); // Take top 10
+    
+    const maxCount = Math.max(...sortedTLDs.map(([, count]) => count));
+    
+    return (
+      <div className="mt-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Top 10 TLDs in Analyzed URLs</h3>
+        <div className="space-y-2">
+          {sortedTLDs.map(([tld, count]) => (
+            <div key={tld} className="flex items-center">
+              <div className="w-20 text-sm font-medium text-gray-700">.{tld}</div>
+              <div className="flex-1 h-6 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary-500 rounded-full"
+                  style={{ width: `${(count / maxCount) * 100}%` }}
+                />
+              </div>
+              <div className="w-12 text-right text-sm text-gray-700 ml-2">{count}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Modal component for displaying the detailed report
+  const ReportModal = () => {
+    if (!selectedRecord) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-white font-cyber">
+              Detailed Analysis Report
+            </h1>
+            <button 
+              onClick={() => setShowReportModal(false)}
+              className="text-gray-400 hover:text-gray-500"
+            >
+              <span className="sr-only">Close</span>
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div className="px-6 py-4">
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">URL Information</h4>
+              <div className="bg-gray-50 p-3 rounded-md">
+                <p className="text-gray-900 font-medium break-all">{selectedRecord.url}</p>
+                <div className="flex items-center mt-2">
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    selectedRecord.is_phishing 
+                      ? 'bg-danger-100 text-danger-800' 
+                      : 'bg-success-100 text-success-800'
+                  }`}>
+                    {selectedRecord.is_phishing ? 'Phishing' : 'Safe'}
+                  </span>
+                  <span className="text-sm text-gray-500 ml-4">
+                    Analyzed on {new Date(selectedRecord.timestamp).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Detection Results</h4>
+              <div className="bg-gray-50 p-3 rounded-md">
+                <div className="flex items-center mb-3">
+                  <div className="text-sm font-medium text-gray-700">Risk Score:</div>
+                  <div className="ml-4 flex-1">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className={`h-2.5 rounded-full ${
+                          selectedRecord.is_phishing ? 'bg-danger-600' : 'bg-success-600'
+                        }`}
+                        style={{ width: `${(selectedRecord.score || 0) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="ml-2 text-sm font-bold text-gray-700">
+                    {Math.round((selectedRecord.score || 0) * 100)}%
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <div className="text-sm font-medium text-gray-700 mb-2">Reasons:</div>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {selectedRecord.report?.reasons.map((reason, idx) => (
+                      <li key={idx} className="text-sm text-gray-600">{reason}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            {selectedRecord.report?.detailedAnalysis && (
+              <div className="mb-6">
+                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Technical Details</h4>
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="mb-4">
+                    <div className="text-sm font-medium text-gray-700 mb-2">Suspicious Elements:</div>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {selectedRecord.report.detailedAnalysis.suspiciousElements.map((item: string, idx: number) => (
+                        <li key={idx} className="text-sm text-gray-600">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <div className="text-sm font-medium text-gray-700 mb-2">Technical Analysis:</div>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {selectedRecord.report.detailedAnalysis.technicalDetails.map((detail: string, idx: number) => (
+                        <li key={idx} className="text-sm text-gray-600">{detail}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {selectedRecord.report?.features && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">URL Features</h4>
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-700"><span className="font-medium">Domain:</span> {selectedRecord.report.features.domain}</p>
+                      <p className="text-sm text-gray-700"><span className="font-medium">HTTPS:</span> {selectedRecord.report.features.usesHttps ? 'Yes' : 'No'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-700"><span className="font-medium">Contains Hyphens:</span> {selectedRecord.report.features.containsHyphens ? 'Yes' : 'No'}</p>
+                      <p className="text-sm text-gray-700"><span className="font-medium">Contains Numbers:</span> {selectedRecord.report.features.containsNumbers ? 'Yes' : 'No'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+            <button
+              onClick={() => setShowReportModal(false)}
+              className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <Layout activePage="stats">
+      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Detection Statistics
+          </h1>
+          <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-500">
+            View statistics and insights from all URL analyses performed by our system.
+          </p>
+        </div>
+
+        {loading && (
+          <div className="mt-8">
+            <Loading message="Loading statistics..." />
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-6 p-4 bg-danger-100 text-danger-700 rounded-md">
+            <div className="flex items-center">
+              <FaExclamationTriangle className="mr-2 flex-shrink-0" />
+              <div>
+                <p>{error}</p>
+                {error.includes('placeholder') && (
+                  <p className="mt-1 text-sm">
+                    The statistics API returned an error. Showing placeholder data until the backend is fixed.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal for detailed report */}
+        {showReportModal && <ReportModal />}
+
+        {stats && !loading && (
+          <div className="mt-10 max-w-5xl mx-auto">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 bg-primary-100 rounded-md p-3">
+                      <FaGlobe className="h-6 w-6 text-primary-600" />
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Total URLs Analyzed
+                      </dt>
+                      <dd className="flex items-baseline">
+                        <div className="text-2xl font-semibold text-gray-900">
+                          {stats.total_urls_analyzed.toLocaleString()}
+                        </div>
+                      </dd>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 bg-danger-100 rounded-md p-3">
+                      <FaExclamationTriangle className="h-6 w-6 text-danger-600" />
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Phishing URLs Detected
+                      </dt>
+                      <dd className="flex items-baseline">
+                        <div className="text-2xl font-semibold text-gray-900">
+                          {stats.total_phishing.toLocaleString()}
+                        </div>
+                        <div className="ml-2 text-sm font-medium text-danger-600">
+                          {stats.phishing_percentage.toFixed(1)}%
+                        </div>
+                      </dd>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 bg-success-100 rounded-md p-3">
+                      <FaGlobe className="h-6 w-6 text-success-600" />
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Legitimate URLs
+                      </dt>
+                      <dd className="flex items-baseline">
+                        <div className="text-2xl font-semibold text-gray-900">
+                          {stats.total_legitimate.toLocaleString()}
+                        </div>
+                        <div className="ml-2 text-sm font-medium text-success-600">
+                          {stats.legitimate_percentage.toFixed(1)}%
+                        </div>
+                      </dd>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 bg-primary-100 rounded-md p-3">
+                      <FaChartBar className="h-6 w-6 text-primary-600" />
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Detection Rate
+                      </dt>
+                      <dd className="flex items-baseline">
+                        <div className="text-2xl font-semibold text-gray-900">
+                          {(stats.phishing_percentage / 100).toLocaleString(undefined, {
+                            style: 'percent',
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1,
+                          })}
+                        </div>
+                      </dd>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Charts */}
+            <div className="mt-8 bg-white shadow rounded-lg p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">URL Analysis Breakdown</h2>
+              
+              <div className="flex justify-center mb-6">
+                <div className="relative h-64 w-64">
+                  {/* Simple pie chart visualization */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg viewBox="0 0 36 36" className="h-full w-full">
+                      <circle 
+                        cx="18" 
+                        cy="18" 
+                        r="15.91549430918954" 
+                        fill="transparent" 
+                        stroke="#d1d5db" 
+                        strokeWidth="3" 
+                      />
+                      <circle 
+                        cx="18" 
+                        cy="18" 
+                        r="15.91549430918954" 
+                        fill="transparent" 
+                        stroke="#ef4444" 
+                        strokeWidth="3" 
+                        strokeDasharray={`${stats.phishing_percentage} ${100 - stats.phishing_percentage}`}
+                        strokeDashoffset="25" 
+                      />
+                    </svg>
+                    <div className="absolute flex flex-col items-center justify-center">
+                      <span className="text-3xl font-bold">{stats.phishing_percentage.toFixed(1)}%</span>
+                      <span className="text-sm text-gray-500">Phishing</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {renderTLDChart()}
+                
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Detections</h3>
+                  {stats.recent_detections && stats.recent_detections.length > 0 ? (
+                    <ul className="divide-y divide-gray-200">
+                      {stats.recent_detections.map((detection, index) => (
+                        <li key={index} className="py-3">
+                          <div className="flex items-center">
+                            <div className={`w-2 h-2 rounded-full mr-3 ${detection.is_phishing ? 'bg-danger-500' : 'bg-success-500'}`}></div>
+                            <div className="flex-1 truncate">
+                              <p className="text-sm font-medium text-gray-900 truncate">{detection.url}</p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(detection.timestamp).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className={`px-2 py-1 text-xs rounded-full ${detection.is_phishing ? 'bg-danger-100 text-danger-800' : 'bg-success-100 text-success-800'}`}>
+                              {detection.is_phishing ? 'Phishing' : 'Safe'}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-500">No recent detections found.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* URL History Table */}
+            <div className="mt-10 bg-white shadow rounded-lg overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    <FaTable className="inline-block mr-2 mb-1" />
+                    URL Search History
+                  </h2>
+                  <div className="flex items-center space-x-2">
+                    <div className="relative inline-block text-left">
+                      <select
+                        className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
+                        value={filter}
+                        onChange={(e) => {
+                          setFilter(e.target.value);
+                          setCurrentPage(1); // Reset to first page when filter changes
+                        }}
+                      >
+                        <option value="all">All URLs</option>
+                        <option value="phishing">Phishing Only</option>
+                        <option value="safe">Safe Only</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 text-sm text-gray-500 bg-blue-50 p-2 rounded">
+                  <FaExclamationTriangle className="inline-block mr-1 text-blue-500" />
+                  The search_history API endpoint (404) is not implemented yet. Showing placeholder data for demonstration.
+                </div>
+              </div>
+
+              {historyLoading ? (
+                <div className="px-6 py-10 text-center">
+                  <Loading message="Loading search history..." />
+                </div>
+              ) : historyError ? (
+                <div className="px-6 py-4 text-danger-600">
+                  <FaExclamationTriangle className="inline-block mr-2" />
+                  {historyError}
+                </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            URL
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <FaCalendarAlt className="inline-block mr-1" /> 
+                            Date & Time
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Score
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Report
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {searchHistory.map((record) => (
+                          <tr key={record.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              #{record.id}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 max-w-xs truncate" title={record.url}>
+                                {record.url}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                record.is_phishing 
+                                  ? 'bg-danger-100 text-danger-800' 
+                                  : 'bg-success-100 text-success-800'
+                              }`}>
+                                {record.is_phishing ? 'Phishing' : 'Safe'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {new Date(record.timestamp).toLocaleString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {record.score !== undefined && (
+                                <div className="flex items-center">
+                                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div 
+                                      className={`h-2.5 rounded-full ${
+                                        record.is_phishing ? 'bg-danger-600' : 'bg-success-600'
+                                      }`}
+                                      style={{ width: `${record.score * 100}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="ml-2 text-xs text-gray-500">
+                                    {Math.round(record.score * 100)}%
+                                  </span>
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <button
+                                onClick={() => {
+                                  setSelectedRecord(record);
+                                  setShowReportModal(true);
+                                }}
+                                className="text-primary-600 hover:text-primary-900 bg-primary-50 px-3 py-1 rounded-md"
+                              >
+                                View Report
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* Pagination */}
+                  <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm text-gray-700">
+                          Showing <span className="font-medium">{((currentPage - 1) * recordsPerPage) + 1}</span> to{' '}
+                          <span className="font-medium">
+                            {Math.min(currentPage * recordsPerPage, 50)}
+                          </span>{' '}
+                          of <span className="font-medium">50</span> results
+                          <span className="italic ml-2 text-gray-500">(Placeholder data until API is ready)</span>
+                        </p>
+                      </div>
+                      <div>
+                        <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                          <button
+                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                              currentPage === 1 
+                                ? 'text-gray-300 cursor-not-allowed' 
+                                : 'text-gray-500 hover:bg-gray-50'
+                            }`}
+                          >
+                            <span className="sr-only">Previous</span>
+                            &larr;
+                          </button>
+                          
+                          {[...Array(totalPages)].map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setCurrentPage(i + 1)}
+                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                                currentPage === i + 1
+                                  ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
+                                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                          
+                          <button
+                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                            className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                              currentPage === totalPages 
+                                ? 'text-gray-300 cursor-not-allowed' 
+                                : 'text-gray-500 hover:bg-gray-50'
+                            }`}
+                          >
+                            <span className="sr-only">Next</span>
+                            &rarr;
+                          </button>
+                        </nav>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+};
+
+export default StatisticsPage;
